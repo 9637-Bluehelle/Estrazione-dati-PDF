@@ -10,11 +10,8 @@ import re
 import random
 import string
 
-cartella_corrente = os.path.dirname(os.path.abspath(__file__))
-
-pytesseract.pytesseract.tesseract_cmd = os.path.join(cartella_corrente, r"Tesseract-OCR\tesseract.exe")
-poppler_path = os.path.join(cartella_corrente, r"poppler-24.08.0\Library\bin")
-
+pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
+poppler_path = "/usr/bin"
 
 currency_mapping = {
         "EUR": "Euro","USD": "US Dollar","ARS": "Argentine Peso","AUD": "Australian Dollar","BHD": "Bahraini Dinar","BWP": "Botswana Pula",
