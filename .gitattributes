@@ -1,2 +1,0 @@
-poppler-24.08.0/** filter=lfs diff=lfs merge=lfs -text
-Tesseract-OCR/** filter=lfs diff=lfs merge=lfs -text
