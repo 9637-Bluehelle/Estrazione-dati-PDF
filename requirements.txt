@@ -1,0 +1,10 @@
+flask-cors
+gunicorn
+Flask
+fuzzysearch
+pytesseract
+pdf2image
+beautifulsoup4
+requests
+openai
+python-dotenv
