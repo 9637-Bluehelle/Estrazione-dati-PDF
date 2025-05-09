@@ -4,7 +4,11 @@ FROM python:3.11-slim
 # Installa Tesseract e Poppler
 RUN apt-get update && \
     apt-get install -y tesseract-ocr libtesseract-dev poppler-utils && \
-    apt-get clean
+    apt-get clean &&\
+    fallocate -l 5G /swapfile && \
+    chmod 600 /swapfile && \
+    mkswap /swapfile && \
+    swapon /swapfile
 
 # Imposta la directory di lavoro
 WORKDIR /app
@@ -19,5 +23,3 @@ RUN pip install --no-cache-dir -r requirements.txt
 CMD ["python", "/app/FlaskAPI_perEstrattore.py"]
 
 #["gunicorn", "FlaskAPI_perEstrattore:app", "--bind", "0.0.0.0:5000", "--workers", "1"]
-
-
