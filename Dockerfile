@@ -4,11 +4,7 @@ FROM python:3.11-slim
 # Installa Tesseract e Poppler
 RUN apt-get update && \
     apt-get install -y tesseract-ocr libtesseract-dev poppler-utils && \
-    apt-get clean &&\
-    fallocate -l 5G /swapfile && \
-    chmod 600 /swapfile && \
-    mkswap /swapfile && \
-    swapon /swapfile
+    apt-get clean
 
 # Imposta la directory di lavoro
 WORKDIR /app
