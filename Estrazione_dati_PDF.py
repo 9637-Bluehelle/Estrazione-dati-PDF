@@ -142,13 +142,13 @@ file_data = {
 }
 
 def extract_text_from_pdf(pdf_path, name_file):
-    pages = convert_from_path(pdf_path, 300, poppler_path=poppler_path)
+    pages = convert_from_path(pdf_path, 150, poppler_path=poppler_path)
     page_indices = [0, len(pages) - 1]
     text = ""
     for i in page_indices:
         img_path = f"page_{name_file+str(i)}.png"
         pages[i].save(img_path, 'PNG')
-        text += pytesseract.image_to_string(img_path, lang='eng+ita+fra+deu+ell')
+        text += pytesseract.image_to_string(img_path, lang='eng+ita') #+fra+deu+ell')
         os.remove(img_path)
     return text
 
