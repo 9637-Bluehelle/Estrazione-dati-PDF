@@ -356,7 +356,7 @@ def process_file(file_path,file_name, anagrafica):
 
         # Converte i dati estratti in un formato strutturato
         try:
-            data_dict, original_valuta, original_total, varx = text_to_dictionary(data, anagrafica)
+            data_dict, original_valuta, original_total, varx = text_to_dictionary(data, file_name, anagrafica)
         except Exception as e:
             return error_control(f"Errore nella conversione dei dati: {e}")
 
