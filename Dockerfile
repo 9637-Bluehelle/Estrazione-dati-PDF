@@ -16,8 +16,8 @@ COPY . /app
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Comando di avvio
-CMD ["gunicorn", "FlaskAPI_perEstrattore:app", "--bind", "0.0.0.0:5000", "--workers", "1", "--timeout=120"]
+CMD ["python", "/app/FlaskAPI_perEstrattore.py"]
 
-#["python", "/app/FlaskAPI_perEstrattore.py"]
+#["gunicorn", "FlaskAPI_perEstrattore:app", "--bind", "0.0.0.0:5000", "--workers", "1"]
 
 
