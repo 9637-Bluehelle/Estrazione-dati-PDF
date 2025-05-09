@@ -10,8 +10,11 @@ import re
 import random
 import string
 
-pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
-poppler_path = "/usr/bin"
+#pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
+#poppler_path = "/usr/bin"
+
+pytesseract.pytesseract.tesseract_cmd = os.getenv("TESSERACT_CMD", "/usr/bin/tesseract")
+poppler_path = os.getenv("POPPLER_PATH", "/usr/bin")
 
 currency_mapping = {
         "EUR": "Euro","USD": "US Dollar","ARS": "Argentine Peso","AUD": "Australian Dollar","BHD": "Bahraini Dinar","BWP": "Botswana Pula",
