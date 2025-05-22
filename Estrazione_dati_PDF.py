@@ -5,6 +5,7 @@ from pdf2image import convert_from_path
 from bs4 import BeautifulSoup
 import requests
 from openai import OpenAI
+from PyPDF2 import PdfReader
 import math
 import re
 import random
@@ -15,20 +16,6 @@ import string
 
 pytesseract.pytesseract.tesseract_cmd = os.getenv("TESSERACT_CMD", "/usr/bin/tesseract")
 poppler_path = os.getenv("POPPLER_PATH", "/usr/bin")
-
-currency_mapping = {
-        "EUR": "Euro","USD": "US Dollar","ARS": "Argentine Peso","AUD": "Australian Dollar","BHD": "Bahraini Dinar","BWP": "Botswana Pula",
-        "BRL": "Brazilian Real","GBP": "British Pound","BND": "Bruneian Dollar","BGN": "Bulgarian Lev",
-        "CAD": "Canadian Dollar","CLP": "Chilean Peso","CNY": "Chinese Yuan Renminbi","COP": "Colombian Peso",
-        "CZK": "Czech Koruna","DKK": "Danish Krone","AED": "Emirati Dirham","HKD": "Hong Kong Dollar","HUF": "Hungarian Forint",
-        "ISK": "Icelandic Krona","INR": "Indian Rupee","IDR": "Indonesian Rupiah","IRR": "Iranian Rial","ILS": "Israeli Shekel",
-        "JPY": "Japanese Yen","KZT": "Kazakhstani Tenge","KWD": "Kuwaiti Dinar","LYD": "Libyan Dinar","MYR": "Malaysian Ringgit",
-        "MUR": "Mauritian Rupee","MXN": "Mexican Peso","NPR": "Nepalese Rupee","NZD": "New Zealand Dollar","NOK": "Norwegian Krone",
-        "OMR": "Omani Rial","PKR": "Pakistani Rupee","PHP": "Philippine Peso","PLN": "Polish Zloty","QAR": "Qatari Riyal",
-        "RON": "Romanian New Leu","RUB": "Russian Ruble","SAR": "Saudi Arabian Riyal","SGD": "Singapore Dollar","ZAR": "South African Rand",
-        "KRW": "South Korean Won","LKR": "Sri Lankan Rupee","SEK": "Swedish Krona","CHF": "Swiss Franc","TWD": "Taiwan New Dollar",
-        "THB": "Thai Baht","TTD": "Trinidadian Dollar","TRY": "Turkish Lira"
-    }
 
 countries = [
     "AF", "AX", "AL", "DZ", "AS", "AD", "AO", "AI", "AQ", "AG", "AR", "AM", "AW", "AU", "AT", "AZ",
@@ -135,101 +122,46 @@ prompt= """
 
 file_data = {
         "data_dict": {},
-        "original_valuta": "",
-        "original_total": "",
-        "varx": "",
-        "errore": []
+        "errore": [],
+        "hasTextContent": ""
 }
 
-def extract_text_from_pdf(pdf_path, name_file):
-    pages = convert_from_path(pdf_path, 150, poppler_path=poppler_path)
-    page_indices = [0, len(pages) - 1]
+def extract_text_from_pdf(pdf_path, name_file, poppler_path=None):
+    def is_digital_pdf(pdf_path):
+        reader = PdfReader(pdf_path)
+        # Controlla prima e ultima pagina
+        page_indices = [0, len(reader.pages) - 1]
+        for i in page_indices:
+            text = reader.pages[i].extract_text()
+            if text and text.strip():
+                return True  # Ha contenuto testuale
+        return False  # Probabilmente è una scansione
+
+    hasTextContent = is_digital_pdf(pdf_path)
     text = ""
-    for i in page_indices:
-        img_path = f"page_{name_file+str(i)}.png"
-        pages[i].save(img_path, 'PNG')
-        text += pytesseract.image_to_string(img_path, lang='eng+ita') #+fra+deu+ell')
-        os.remove(img_path)
-    return text
 
-file_messages={}
-def convert_to_euro(amount:float,divisa, from_currency, date, file_name) :
-   # Funzione per ottenere il tasso di cambio dal sito x-rates
-    def fetch_exchange_rate(currency, date):
-        url = f"https://www.x-rates.com/historical/?from=EUR&amount=1&date={date}"
-        response = requests.get(url)
-        soup = BeautifulSoup(response.content, 'lxml')
-        rates = {"Euro": "1"}  # Aggiungi Euro come valuta di base
-        # Estrazione dei tassi di cambio dalla pagina HTML
-        for tr_tag in soup.find_all('tbody')[1]:
-            try:
-                td_tags = tr_tag.find_all('td')
-                rates[td_tags[0].text] = td_tags[1].text
-            except Exception:
-                pass
-        if currency not in rates:
-            file_data["errore"].append("Valuta non trovata.\nVerifica che la valuta sia nel formato atteso:\n standard ISO 4217 ")
-        return float(rates[currency])
+    if hasTextContent:
+        # PDF digitale → estrazione diretta
+        reader = PdfReader(pdf_path)
+        page_indices = [0, len(reader.pages) - 1]
+        for i in page_indices:
+            page_text = reader.pages[i].extract_text()
+            if page_text:
+                text += page_text
+    else:
+        # PDF scansionato → OCR
+        pages = convert_from_path(pdf_path, 150, poppler_path=poppler_path)
+        page_indices = [0, len(pages) - 1]
+        for i in page_indices:
+            img_path = f"page_{name_file+str(i)}.png"
+            pages[i].save(img_path, 'PNG')
+            text += pytesseract.image_to_string(img_path, lang='eng+ita')
+            os.remove(img_path)
 
-    # Recupera il tasso di cambio dal sito x-rates
-    exchange_rate = fetch_exchange_rate(from_currency, date)
-
-    # Se la valuta di origine non è EUR, invertiamo il tasso di cambio
-    if from_currency != "EUR":
-        exchange_rate = 1 / exchange_rate
-
-    # Logica di conversione: moltiplichiamo per il tasso di cambio
-    result = amount * exchange_rate
-    result = math.floor(result * 100) / 100
-
-    message1 = f"\n     Tasso di cambio\n   in data {date}:\n\n"
-    message2 = f" 1 {divisa} = {exchange_rate:.4f} EUR\n"
-
-    file_messages[file_name] = [message1, message2]
-
-    return result
+    return hasTextContent, text
 
 def random_string(n, charset=string.ascii_letters + string.digits):
     return ''.join(random.choices(charset, k=n))
-
-# Funzione per normalizzare la denominazione
-def normalizza_denominazione(denominazione):
-    # Rimuove gli spazi e rende tutto maiuscolo
-    return re.sub(r'[\s.]', '',  denominazione).lower()
-
-# Funzione per verificare la similarità
-def verifica_similarita_fuzzy(str_1, str_2, max_l_dist = 2):
-    # Trova una corrispondenza fuzzy tra la denominazione e il testo
-    matches = find_near_matches(str_1, str_2, max_l_dist = max_l_dist)  # max_l_dist controlla la distanza di Levenshtein
-    return len(matches) > 0
-
-# Funzione per verificare la presenza di una denominazione nel testo
-def verifica_denominazione_in_testo(text, cod_iva, anagrafica):#json_file = JSON_FILE
-    # Carica i dati dal file JSON
-    #with open(json_file, 'r', encoding='utf-8') as file_json:
-    #    aziende = json.load(file_json)
-
-    # Normalizza anche il testo da verificare
-    testo_normalizzato = normalizza_denominazione(text)
-
-    # Verifica se una delle denominazioni normalizzate è presente nel testo normalizzato
-    anagrafica_data = None
-    for azienda in anagrafica:
-        denominazione_normalizzata = normalizza_denominazione(azienda["Denominazione"])
-        partita_iva = azienda["partita_iva"]
-        if verifica_similarita_fuzzy(denominazione_normalizzata, testo_normalizzato) or verifica_similarita_fuzzy(partita_iva[2:], cod_iva):
-            anagrafica_data = {
-                "IdPaese_C": partita_iva[:2],
-                "IdCodice_C": partita_iva[2:],
-                "Denominazione_C": azienda["Denominazione"],
-                "Indirizzo_C": azienda["indirizzo"],
-                "CAP_C": azienda["cap"],
-                "Comune_C": azienda["comune"],
-                "Nazione_C": azienda["nazione"],
-            }
-            #return anagrafica_data # La denominazione è stata trovata
-
-    return ("n", anagrafica_data) if anagrafica_data else ("s", None)
 
 def text_to_dictionary(text,file_name, anagrafica):
     result = {}
@@ -260,35 +192,6 @@ def text_to_dictionary(text,file_name, anagrafica):
 
     result = {key: "" if value == "vuoto" else value for key, value in result.items()}
 
-    original_valuta = result["Divisa"]
-    original_total = result["ImportoTotale"]
-
-    varx, anagrafica_data = verifica_denominazione_in_testo(result["Denominazione_C"], result["IdCodice_C"], anagrafica)
-    if anagrafica_data and isinstance(anagrafica_data, dict):
-        result["IdPaese_C"]= anagrafica_data["IdPaese_C"]
-        result["IdCodice_C"]= anagrafica_data["IdCodice_C"]
-        result["Denominazione_C"]= anagrafica_data["Denominazione_C"]
-        result["Indirizzo_C"]= anagrafica_data["Indirizzo_C"]
-        result["CAP_C"]= anagrafica_data["CAP_C"]
-        result["Comune_C"]= anagrafica_data["Comune_C"]
-        result["Nazione_C"]= anagrafica_data["Nazione_C"]
-    else:
-        pass
-
-    # Verifica necessità di conversione valuta
-    if "ImportoTotale" in result and "Divisa" in result:
-        try:
-            importo_val = float(result["ImportoTotale"])
-            valuta = result["Divisa"]
-            if valuta in currency_mapping and valuta != "EUR":
-                nuovo_importo= convert_to_euro(importo_val,valuta, currency_mapping[valuta], result["Data_pagamento"],file_name)
-                result["ImportoTotale"] = f"{nuovo_importo:.2f}"
-                result["Divisa"] = "EUR"
-        except ValueError as v:
-            file_data["errore"].append(f"Qualcosa è andato storto durante\nil calcolo del cambio valuta.\n FILE: {file_name}\n{v}")
-            result["ImportoTotale"] = ""
-            result["Divisa"] = "EUR"
-
     # Numero_Fattura senza caratteri speciali
     numero_fattura = re.sub(r'[^a-zA-Z0-9]', '', result['Numero_fattura'])[-10:]
     result['Numero_fattura'] = numero_fattura
@@ -296,7 +199,7 @@ def text_to_dictionary(text,file_name, anagrafica):
     # Indirizzo corto
     result["Indirizzo_P"] = result["Indirizzo_P"][:30]
 
-    # Controlla "Nazione_P"
+    # Tutti i cap fornitori
     result["CAP_P"] = "00000"
 
     # standardizzazione comune fornitore
@@ -324,8 +227,8 @@ def text_to_dictionary(text,file_name, anagrafica):
     if result['IdPaese_C'] not in countries:
         result['IdPaese_C'] = result['Nazione_C']
 
-    return result, original_valuta, original_total, varx
-
+    return result
+        
 def openai_text_processing(api_openai, text):
     client = OpenAI(api_key=api_openai)
     response = client.chat.completions.create(
@@ -342,7 +245,7 @@ def error_control(err_message):
 def process_file(file_path,file_name, anagrafica):
     try:
         # Estrai il testo dal PDF
-        text = extract_text_from_pdf(file_path, file_name)
+        hasTextContent, text = extract_text_from_pdf(file_path, file_name)
 
         # API
         api_openai = os.getenv('api_openAi')
@@ -388,14 +291,12 @@ def process_file(file_path,file_name, anagrafica):
         """
         # Converte i dati estratti in un formato strutturato
         try:
-            data_dict, original_valuta, original_total, varx = text_to_dictionary(data, file_name, anagrafica)
+            data_dict = text_to_dictionary(data, file_name, anagrafica)
         except Exception as e:
             return error_control(f"Errore nella conversione dei dati: {e}")
-
+        
         file_data["data_dict"] = data_dict
-        file_data["original_valuta"] = original_valuta
-        file_data["original_total"] = original_total
-        file_data["varx"] = varx
+        file_data["hasTextContent"] = hasTextContent
 
     except KeyError as k:
         return error_control(f"Dati estratti non validi: {k}")
