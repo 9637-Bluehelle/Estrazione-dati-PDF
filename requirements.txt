@@ -1,6 +1,7 @@
 flask-cors
 gunicorn
 Flask
+PyPDF2
 fuzzysearch
 pytesseract
 pdf2image
