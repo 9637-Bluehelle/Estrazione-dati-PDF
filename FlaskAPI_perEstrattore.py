@@ -6,7 +6,7 @@ import json
 from Estrazione_dati_PDF import process_file
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
+CORS(app, resources={r"/*": {"origins": "convertitore-app-pdf-xml-rlgs.vercel.app"}})#"http://localhost:3000"
 #app.config['DEBUG'] = True
 
 @app.route('/', methods=['POST'])
