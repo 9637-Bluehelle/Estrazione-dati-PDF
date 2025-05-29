@@ -252,38 +252,6 @@ def process_file(file_path,file_name, anagrafica):
 
         # Legge prompt // variabile creata all'inizio
         # Estrae le informazioni usando OpenAI
-       """ data = 
-            Trasmittente (chi invia la fattura):
-            IdPaese_T: EU
-            IdCodice_T: 372041333
-
-            Prestatore (fornitore):
-            IdPaese_P: EU
-            IdCodice_P: 372041333
-            Denominazione_P: OpenAl, LLC
-            Indirizzo_P: 548 Market Street, PMB 97273
-            CAP_P: 94104-5401
-            Comune_P: San Francisco
-            Nazione_P: US
-
-            Committente (cliente):
-            IdPaese_C: IT
-            IdCodice_C: 04508350875
-            Denominazione_C: MOTO 2000 SRL Unipersonale
-            Indirizzo_C: Via Etnea, 58
-            CAP_C: 95030
-            Comune_C: Gravina di Catania
-            Nazione_C: IT
-
-            Informazioni sulla fattura:
-            Divisa: USD
-            Numero_fattura: 6ED1216B-0002
-            ImportoTotale: 20.00
-            Data_pagamento: 2025-01-10
-            Data_Acquisto: 2025-01-10
-            oggetto_acquistato: ChatGPT Plus Subscription
-        """
-        
         try:
             data = openai_text_processing(api_openai, text)
         except Exception as o:
