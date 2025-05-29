@@ -252,7 +252,7 @@ def process_file(file_path,file_name, anagrafica):
 
         # Legge prompt // variabile creata all'inizio
         # Estrae le informazioni usando OpenAI
-        data = """
+       """ data = 
             Trasmittente (chi invia la fattura):
             IdPaese_T: EU
             IdCodice_T: 372041333
@@ -283,12 +283,12 @@ def process_file(file_path,file_name, anagrafica):
             Data_Acquisto: 2025-01-10
             oggetto_acquistato: ChatGPT Plus Subscription
         """
-        """
+        
         try:
             data = openai_text_processing(api_openai, text)
         except Exception as o:
             return error_control(f"Errore OpenAI: {o}")
-        """
+        
         # Converte i dati estratti in un formato strutturato
         try:
             data_dict = text_to_dictionary(data, file_name, anagrafica)
