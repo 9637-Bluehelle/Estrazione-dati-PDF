@@ -33,12 +33,17 @@ def process_file_api():
         file.save(file_path)
 
     try:
+        api_key =  request.form.get('api_key')
+     except Exception as e:
+        return jsonify({"errore": str(e)}), 500
+
+    try:
         # Elabora il file con la funzione esistente
-        file_data = process_file(file_path, filename, anagrafica)
+        file_data = process_file(file_path, filename, anagrafica, api_key)
         return jsonify(file_data), 200
 
     except Exception as e:
-        return f"Errore: {str(e)}", 500
+        return jsonify({"errore": str(e)}), 500
 
     finally:
         try:
