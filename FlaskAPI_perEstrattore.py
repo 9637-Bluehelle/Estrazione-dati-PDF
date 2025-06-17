@@ -34,7 +34,7 @@ def process_file_api():
 
     try:
         api_key =  request.form.get('api_key')
-     except Exception as e:
+    except Exception as e:
         return jsonify({"errore": str(e)}), 500
 
     try:
