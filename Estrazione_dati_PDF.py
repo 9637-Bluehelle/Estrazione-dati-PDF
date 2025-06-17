@@ -242,12 +242,12 @@ def error_control(err_message):
     file_data["errore"].append(err_message)
     return file_data
 
-def get_openai_client(api_key = ""):
+def get_openai_client(api_key):
     if not api_key:  # Se la stringa è vuota usa quella nell'ambiente
         api_key = os.getenv("OPENAI_API_KEY")
     return OpenAI(api_key=api_key)
 
-def process_file(file_path,file_name, anagrafica, api_key):
+def process_file(file_path, file_name, anagrafica, api_key):
     try:
         # Estrai il testo dal PDF
         hasTextContent, text = extract_text_from_pdf(file_path, file_name)
