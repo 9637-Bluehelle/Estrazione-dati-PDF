@@ -229,8 +229,8 @@ def text_to_dictionary(text,file_name, anagrafica):
 
     return result
         
-def openai_text_processing(api_openai, text):
-    client = OpenAI(api_key=api_openai)
+def openai_text_processing(client, text):
+    #client = OpenAI(api_key=api_openai)
     response = client.chat.completions.create(
         model='gpt-4-turbo',
         messages=[{"role": "system", "content": prompt}, {"role": "user", "content": text}],
@@ -242,13 +242,18 @@ def error_control(err_message):
     file_data["errore"].append(err_message)
     return file_data
 
-def process_file(file_path,file_name, anagrafica):
+def get_openai_client(api_key = ""):
+    if not api_key:  # Se la stringa è vuota usa quella nell'ambiente
+        api_key = os.getenv("OPENAI_API_KEY")
+    return OpenAI(api_key=api_key)
+
+def process_file(file_path,file_name, anagrafica, api_key):
     try:
         # Estrai il testo dal PDF
         hasTextContent, text = extract_text_from_pdf(file_path, file_name)
 
         # API
-        api_openai = os.getenv('api_openAi')
+        api_openai = get_openai_client(api_key)
 
         # Legge prompt // variabile creata all'inizio
         # Estrae le informazioni usando OpenAI
