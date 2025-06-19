@@ -244,7 +244,7 @@ def error_control(err_message):
 
 def get_openai_client(api_key):
     if not api_key:  # Se la stringa è vuota usa quella nell'ambiente
-        api_key = os.getenv("OPENAI_API_KEY")
+        api_key = os.getenv("api_openAi")
     return OpenAI(api_key=api_key)
 
 def process_file(file_path, file_name, anagrafica, api_key):
