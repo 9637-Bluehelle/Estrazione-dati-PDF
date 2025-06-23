@@ -6,6 +6,11 @@ RUN apt-get update && \
     apt-get install -y tesseract-ocr libtesseract-dev poppler-utils libxml2-dev libxslt1-dev && \
     apt-get clean
 
+# Installa l'antivirus ClamAV---------
+RUN apt-get update && apt-get install -y clamav clamav-freshclam
+# Aggiorna il database dei virus------
+RUN freshclam
+
 # Imposta la directory di lavoro
 WORKDIR /app
 
