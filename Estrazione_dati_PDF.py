@@ -138,27 +138,7 @@ def is_valid_pdf(path: str) -> bool:
     except:
         return False
 
-#scansione antivirus
-def scan_with_clam(path):
-    try:
-        result = subprocess.run(
-            ['clamscan', '--no-summary', path],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
-
-        if result.returncode == 0:
-            print(f"[OK] Nessun virus trovato in: {path}")
-            return True
-        elif result.returncode == 1:
-            print(f"[VIRUS] File infetto: {path}")
-            return False
-        else:
-            error_control(f"Errore durante la scansione: {result.returncode} \n{result.stderr.strip()}")
-
-    except FileNotFoundError:
-        error_control("clamscan non trovato. Verifica che ClamAV sia installato nel container.")
+#scansione antivirus---------------
 
 #contenuti sospetti
 def has_suspicious_pdf(path:str) -> bool:
@@ -171,8 +151,6 @@ def has_suspicious_pdf(path:str) -> bool:
 #funzione per valdazione completa
 def validate_pdf(path:str) -> bool:
     if not is_valid_pdf(path):
-        return False
-    if not scan_with_clam(path):
         return False
     if has_suspicious_pdf(path):
         return False
