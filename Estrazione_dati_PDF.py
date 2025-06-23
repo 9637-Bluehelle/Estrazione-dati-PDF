@@ -126,36 +126,6 @@ file_data = {
         "hasTextContent": ""
 }
 
-#Controllo formato e integrità PDF
-def is_valid_pdf(path: str) -> bool:
-    # MIME type check
-    if magic.from_file(path, mime=True) != 'application/pdf':
-        return False
-    # Verifica apertura e numero pagine via PyPDF2
-    try:
-        reader = PdfReader(path)
-        return len(reader.pages) > 0
-    except:
-        return False
-
-#scansione antivirus---------------
-
-#contenuti sospetti
-def has_suspicious_pdf(path:str) -> bool:
-    out = subprocess.check_output(['pdfid.py', path], text=True)
-    for tag in ['/JavaScript', '/OpenAction', '/AA', '/EmbeddedFile']:
-        if f'{tag}:' in out and not out.strip().endswith('0'):
-            return True
-    return False
-
-#funzione per valdazione completa
-def validate_pdf(path:str) -> bool:
-    if not is_valid_pdf(path):
-        return False
-    if has_suspicious_pdf(path):
-        return False
-    return True
-
 def extract_text_from_pdf(pdf_path, name_file, poppler_path=None):
     def is_digital_pdf(pdf_path):
         reader = PdfReader(pdf_path)
