@@ -6,11 +6,6 @@ RUN apt-get update && \
     apt-get install -y tesseract-ocr libtesseract-dev poppler-utils libxml2-dev libxslt1-dev && \
     apt-get clean
 
-# Installa l'antivirus ClamAV---------
-RUN apt-get update && apt-get install -y clamav clamav-freshclam
-# Aggiorna il database dei virus------
-RUN freshclam
-
 # Imposta la directory di lavoro
 WORKDIR /app
 
@@ -22,7 +17,3 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Comando di avvio
 CMD ["gunicorn", "--timeout", "500", "FlaskAPI_perEstrattore:app", "--bind", "0.0.0.0:5000", "--workers", "1"]
-
-#["python", "/app/FlaskAPI_perEstrattore.py"]
-
-#["gunicorn", "FlaskAPI_perEstrattore:app", "--bind", "0.0.0.0:5000", "--workers", "1"]
