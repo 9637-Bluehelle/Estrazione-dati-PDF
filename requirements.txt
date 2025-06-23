@@ -8,7 +8,6 @@ pdf2image
 beautifulsoup4
 requests
 openai
-clamd
 python-dotenv
 python-magic
 lxml
