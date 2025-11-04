@@ -241,19 +241,19 @@ def openai_text_processing(client, text):
 def error_control(err_message):
     file_data["errore"].append(err_message)
     return file_data
-
+"""
 def get_openai_client(api_key):
     if not api_key:  # Se la stringa è vuota usa quella nell'ambiente
         api_key = os.getenv("api_openAi")
     return OpenAI(api_key=api_key)
-
+"""
 def process_file(file_path, file_name, anagrafica, api_key):
     try:
         # Estrai il testo dal PDF
         hasTextContent, text = extract_text_from_pdf(file_path, file_name)
 
         # API
-        api_openai = get_openai_client(api_key)
+        api_openai = OpenAI(api_key=api_key) # get_openai_client(api_key)
 
         # Legge prompt // variabile creata all'inizio
         # Estrae le informazioni usando OpenAI
@@ -284,3 +284,4 @@ def process_file(file_path, file_name, anagrafica, api_key):
         return error_control(f"Errore durante l'elaborazione: {e}")
 
     return file_data
+
