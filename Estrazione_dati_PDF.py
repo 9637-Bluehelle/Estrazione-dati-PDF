@@ -193,16 +193,20 @@ def text_to_dictionary(text,file_name, anagrafica):
     result = {key: "" if value == "vuoto" else value for key, value in result.items()}
 
     # Numero_Fattura senza caratteri speciali
+    result['originalNumero_fattura'] = result['Numero_fattura']
     numero_fattura = re.sub(r'[^a-zA-Z0-9]', '', result['Numero_fattura'])[-10:]
     result['Numero_fattura'] = numero_fattura
 
     # Indirizzo corto
+    result['originalIndirizzo_P'] = result["Indirizzo_P"]
     result["Indirizzo_P"] = result["Indirizzo_P"][:30]
 
     # Tutti i cap fornitori
+    result['originalCAP_P'] = result["CAP_P"]
     result["CAP_P"] = "00000"
 
     # standardizzazione comune fornitore
+    result["originalComune_P"] = result["Comune_P"]
     if result["Nazione_P"] in country_fcomune.keys():
         result["Comune_P"] = country_fcomune[result["Nazione_P"]]
 
@@ -210,20 +214,25 @@ def text_to_dictionary(text,file_name, anagrafica):
     result['ProgressivoInvio'] = random_string(5)
 
     # controlo P.iva "vuoto"
+    result["originalIdCodice_P"] = result["IdCodice_P"]
     if result["IdCodice_P"] == "":
         result["IdCodice_P"] = random_string(11, string.digits)
 
     # controlo P.iva "vuoto"
+    result["originalIdCodice_T"] = result["IdCodice_T"]
     if result["IdCodice_T"] == "":
         result["IdCodice_T"] = result["IdCodice_P"]
 
     # controlla P.iva
+    result["originalIdPaese_T"] = result["IdPaese_T"]
     if result['IdPaese_T'] not in countries:
         result['IdPaese_T'] = result['Nazione_P']
-
+        
+    result["originalIdPaese_P"] = result["IdPaese_P"]
     if result['IdPaese_P'] not in countries:
         result['IdPaese_P'] = result['Nazione_P']
 
+    result["originalIdPaese_C"] = result["IdPaese_C"]
     if result['IdPaese_C'] not in countries:
         result['IdPaese_C'] = result['Nazione_C']
 
@@ -284,4 +293,5 @@ def process_file(file_path, file_name, anagrafica, api_key):
         return error_control(f"Errore durante l'elaborazione: {e}")
 
     return file_data
+
 
