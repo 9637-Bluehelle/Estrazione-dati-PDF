@@ -13,16 +13,16 @@ try:
   if cred_json:
     # Crea un file temporaneo o usa StringIO per caricare da stringa
     cred = credentials.Certificate(json.loads(cred_json))
-   else:
-     # Fallback o gestione di un errore se le credenziali non sono disponibili
-     print("WARNING: Firebase credentials not found in environment.")
-     # Solleva un errore o gestisci l'inizializzazione parziale se necessario.
+  else:
+    # Fallback o gestione di un errore se le credenziali non sono disponibili
+    print("WARNING: Firebase credentials not found in environment.")
+    # Solleva un errore o gestisci l'inizializzazione parziale se necessario.
             
-   if 'cred' in locals() and not firebase_admin._apps:
-     initialize_app(cred)
-     db = firestore.client() # Variabile globale per Firestore
-   elif not firebase_admin._apps:
-     print("ERROR: Could not initialize Firebase Admin SDK. Missing credentials.")
+  if 'cred' in locals() and not firebase_admin._apps:
+    initialize_app(cred)
+    db = firestore.client() # Variabile globale per Firestore
+  elif not firebase_admin._apps:
+    print("ERROR: Could not initialize Firebase Admin SDK. Missing credentials.")
 except Exception as e:
     print(f"Error initializing Firebase: {e}")
 
@@ -111,4 +111,5 @@ def process_file_api():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))  # Render PORT come env
     os.system("gunicorn FlaskAPI_perEstrattore:app --bind 0.0.0.0:$PORT --workers 1")
+
 
