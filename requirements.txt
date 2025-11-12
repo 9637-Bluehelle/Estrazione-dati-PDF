@@ -6,6 +6,7 @@ fuzzysearch
 pytesseract
 pdf2image
 beautifulsoup4
+firebase-admin
 requests
 openai
 python-dotenv
