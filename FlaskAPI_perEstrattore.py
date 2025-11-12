@@ -88,7 +88,7 @@ def process_file_api():
     with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(filename)[1]) as temp_file:
         file_path = temp_file.name
         file.save(file_path)
-   """
+    """
     try:
         api_key =  request.form.get('api_key')
     except Exception as e:
@@ -111,5 +111,6 @@ def process_file_api():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))  # Render PORT come env
     os.system("gunicorn FlaskAPI_perEstrattore:app --bind 0.0.0.0:$PORT --workers 1")
+
 
 
