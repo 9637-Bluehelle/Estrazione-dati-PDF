@@ -4,10 +4,6 @@ import os
 import tempfile
 import json
 from Estrazione_dati_PDF import process_file
-#
-import firebase_admin
-from firebase_admin import credentials, firestore, initialize_app
-
 
 app = Flask(__name__)
 CORS(app, origins=["https://convertitorepdfxml.vercel.app", "http://localhost:3000"])
@@ -59,7 +55,4 @@ def process_file_api():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))  # Render PORT come env
     os.system("gunicorn FlaskAPI_perEstrattore:app --bind 0.0.0.0:$PORT --workers 1")
-
-
-
-
+    
